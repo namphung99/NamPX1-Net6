@@ -107,10 +107,43 @@ namespace NamPX.API.Controllers
         }
 
         [HttpPut]
+        [Route("{id:guid}")]
 
-        public async Task<IActionResult> UpdateRegionAsync(Guid id, )
+        public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] Models.DTO.UpdateRegionRequest updateRegionRequest)
         {
+            // Convert DTO to domain model
+            var region = new Models.Domain.Region()
+            {
+                Code = updateRegionRequest.Code,
+                Area = updateRegionRequest.Area,
+                Lat = updateRegionRequest.Lat,
+                Long = updateRegionRequest.Long,
+                Name = updateRegionRequest.Name,
+                Population = updateRegionRequest.Population
+            };
 
+            // update region using Repository
+            region = await regionRepository.UpdateAsync(id,region);
+
+            // If null then NotFound
+            if(region == null)
+            {
+                return NotFound();
+            }
+
+            // Convert domain back to DTO
+            var regionDTO = new Models.DTO.Region()
+            {
+                Id = region.Id,
+                Code = region.Code,
+                Area = region.Area,
+                Lat = region.Lat,
+                Long = region.Long,
+                Name = region.Name,
+                Population = region.Population
+            };
+
+            return Ok(regionDTO);
         }
     }
 }
